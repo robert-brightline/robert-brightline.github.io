@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "pre-commit : installing packages"
+pnpm install
+
+echo "pre-commit : Lint, build, and test all projects"
+
+npx nx run-many -t lint build
+
+git add .
+echo "pre-commit : completed"

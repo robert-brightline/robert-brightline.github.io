@@ -1,0 +1,45 @@
+name: Lint, Test, Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10.27.0
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        name: Setup Node
+        with:
+          node-version: 22.19.0
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - uses: nrwl/nx-set-shas@v4
+        name: Set Nx shas for affected commands
+
+      - name: Nx Affected Lint, Test, Build
+        run: npx nx affected -t lint test build
+
+      # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
+      - run: npx nx fix-ci
+        if: always()
